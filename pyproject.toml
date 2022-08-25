@@ -1,0 +1,59 @@
+[tool.poetry]
+name = "kevreport"
+version = "0.1.0"
+description = "Generate a report of open vulnerabilities based on the CISA BOD 22-10 KEV"
+authors = ["Jeff Mallozzi <jeffmallozzi@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pyTenable = "^1.4.7"
+
+[tool.poetry.dev-dependencies]
+black = "^22.6.0"
+pre-commit = "^2.20.0"
+flake8 = "^5.0.4"
+isort = "^5.10.1"
+interrogate = "^1.5.0"
+pytest = "^7.1.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 79
+include = '\.pyi?$'
+exclude = '''
+/(
+	\.git
+| \.hg
+| \.mypy_cache
+| \.tox
+| \.venv
+| _build
+| buck-out
+| build   
+)/ 
+'''
+
+[tool.interrogate]
+ignore-init-method = true
+ignore-init-module = false
+ignore-magic = false
+ignore-semiprivate = false
+ignore-private = false
+ignore-property-decorators = false
+ignore-module = true
+ignore-nested-functions = false
+ignore-nested-classes = true
+ignore-setters = false
+fail-under = 95
+exclude = ["setup.py", "docs", "build"]
+ignore-regex = ["^get$", "^mock_.*", ".*BaseClass.*"]
+verbose = 0
+quiet = false
+whitelist-regex = []
+color = true
+generate-badge = "."
+badge-format = "svg"
