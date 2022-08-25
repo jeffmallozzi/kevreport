@@ -130,3 +130,6 @@ dmypy.json
 
 # VS Code Workspace
 *.code-workspace
+
+# Config files
+*.cfg
