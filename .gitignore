@@ -133,3 +133,4 @@ dmypy.json
 
 # Config files
 *.cfg
+src/kevreport.cfg

@@ -378,6 +378,20 @@ tomli = ">=1.0.0"
 testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.7.2)", "requests", "xmlschema"]
 
 [[package]]
+name = "pytest-asyncio"
+version = "0.19.0"
+description = "Pytest support for asyncio"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+pytest = ">=6.1.0"
+
+[package.extras]
+testing = ["coverage (>=6.2)", "hypothesis (>=5.7.1)", "flaky (>=3.5.0)", "mypy (>=0.931)", "pytest-trio (>=0.7.0)"]
+
+[[package]]
 name = "python-box"
 version = "6.0.2"
 description = "Advanced Python dictionaries with dot notation access"
@@ -527,7 +541,7 @@ testing = ["coverage (>=6.2)", "coverage-enable-subprocess (>=1)", "flaky (>=3.7
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "bbab916652efc2e110d0351102d5aced03d7b4007e9c2011ab528265a4390995"
+content-hash = "e69ff60ebc5f89cbd14758cf51e4cfeb5a9783e156b32db1d6d03abe13ad32c5"
 
 [metadata.files]
 arrow = [
@@ -596,6 +610,7 @@ pyflakes = []
 pyparsing = []
 pytenable = []
 pytest = []
+pytest-asyncio = []
 python-box = [
     {file = "python-box-6.0.2.tar.gz", hash = "sha256:c15f09fa2a8730702115396b490ddc17dde3d4276a4f24eb754e35f102c41347"},
     {file = "python_box-6.0.2-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:41ae4ef7d8336b377b9caa1c1ef5b1efff3aaebe72f580eeb641c01a15288953"},
