@@ -11,6 +11,7 @@ import requests
 from tenable.sc import TenableSC
 
 __version__ = "0.1.0"
+sem = asyncio.Semaphore(5)
 
 
 def parse_args():
@@ -45,7 +46,7 @@ def format_date(timestamp):
 def get_kev(url):
     """Retrieves the KEV from CISA and returns it in json format"""
     resp = requests.get(url)
-    return resp.json()
+    return resp.json()["vulnerabilities"]
 
 
 def sort_by_due_date(kev):
@@ -54,6 +55,7 @@ def sort_by_due_date(kev):
     resp = {}
     for vuln in kev:
         resp.setdefault(vuln["dueDate"], []).append(vuln["cveID"])
+    return resp
 
 
 async def get_vulns(cve_list, due_date, config, profile):
@@ -61,12 +63,13 @@ async def get_vulns(cve_list, due_date, config, profile):
     provided list of CVE. Date fields are properly formated. Returns a list"""
     vulns = []
 
+    sem.acquire()
     with TenableSC(
         config[profile]["host"],
         config[profile]["access_key"],
         config[profile]["secret_key"],
     ) as sc:
-        for cves in chunk(cve_list, config[profile]["chunk_size"]):
+        for cves in chunk(cve_list, int(config[profile]["chunk_size"])):
             filters = [
                 ("cveID", "=", ",".join(cves)),
                 (
@@ -88,6 +91,9 @@ async def get_vulns(cve_list, due_date, config, profile):
                 vuln["firstSeen"] = format_date(int(vuln["firstSeen"]))
                 vuln["lastSeen"] = format_date(int(vuln["lastSeen"]))
                 vulns.append(vuln)
+
+    sem.release()
+    return vulns
 
 
 def sort_vulns_by_repo(vulns):
@@ -142,7 +148,7 @@ async def main():
 
     # Get vulns from SC
     vulns = await asyncio.gather(
-        [
+        *[
             get_vulns(cve_list, due_date, config, profile)
             for due_date, cve_list in cves_by_due_date.items()
         ]
@@ -154,12 +160,12 @@ async def main():
     # Output files
     output_fields = config[profile]["fields"].split()
     output_files = await asyncio.gather(
-        [
+        *[
             write_file(repo, vuln_list, output_fields)
             for repo, vuln_list in vulns_by_repo.items()
         ]
     )
-    logger.debug(f"The following output files were created: {output_files}")
+    logger.info(f"The following output files were created: {output_files}")
 
 
 if __name__ == "__main__":
