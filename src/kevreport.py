@@ -11,7 +11,7 @@ import requests
 from tenable.sc import TenableSC
 
 __version__ = "0.1.0"
-sem = asyncio.Semaphore(5)
+sem = asyncio.Semaphore(2)
 
 
 def parse_args():
@@ -103,6 +103,8 @@ def sort_vulns_by_repo(vulns):
     for vuln in vulns:
         resp.setdefault(vuln["repository"]["name"], []).append(vuln)
 
+    return resp
+
 
 async def write_file(repo, vuln_list, field_names):
     """Writes out the csv file for the list of vulnerabilities. Returns
@@ -114,6 +116,8 @@ async def write_file(repo, vuln_list, field_names):
         writer = DictWriter(cf, fieldnames=field_names, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(vuln_list)
+
+    return filename
 
 
 async def main():
@@ -154,8 +158,13 @@ async def main():
         ]
     )
 
+    # flaten vulns
+    flat_vulns = []
+    for vuln in vulns:
+        flat_vulns.extend(vuln)
+
     # Sort vulns by repo
-    vulns_by_repo = sort_vulns_by_repo(vulns)
+    vulns_by_repo = sort_vulns_by_repo(flat_vulns)
 
     # Output files
     output_fields = config[profile]["fields"].split()
