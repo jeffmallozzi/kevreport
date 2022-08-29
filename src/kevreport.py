@@ -68,36 +68,35 @@ async def get_vulns(
     provided list of CVE. Date fields are properly formated. Returns a list"""
     vulns = []
 
-    sem.acquire()
-    with TenableSC(
-        config[profile]["host"],
-        config[profile]["access_key"],
-        config[profile]["secret_key"],
-    ) as sc:
-        for cves in chunk(cve_list, int(config[profile]["chunk_size"])):
-            filters = [
-                ("cveID", "=", ",".join(cves)),
-                (
-                    "repository",
-                    "=",
-                    [int(x) for x in config[profile]["repos"].split()],
-                ),
-                ("acceptRiskStatus", "=", config[profile]["accept_risk"]),
-            ]
-            kwargs = {"tool": "vulndetails"}
+    async with sem:
+        with TenableSC(
+            config[profile]["host"],
+            config[profile]["access_key"],
+            config[profile]["secret_key"],
+        ) as sc:
+            for cves in chunk(cve_list, int(config[profile]["chunk_size"])):
+                filters = [
+                    ("cveID", "=", ",".join(cves)),
+                    (
+                        "repository",
+                        "=",
+                        [int(x) for x in config[profile]["repos"].split()],
+                    ),
+                    ("acceptRiskStatus", "=", config[profile]["accept_risk"]),
+                ]
+                kwargs = {"tool": "vulndetails"}
 
-            result = sc.analysis.vulns(*filters, **kwargs)
+                result = sc.analysis.vulns(*filters, **kwargs)
 
-            for vuln in result:
-                vuln["CISA_due_date"] = due_date
-                vuln["cve"] = ",".join(
-                    intersect(cve_list, vuln["cve"].split(","))
-                )
-                vuln["firstSeen"] = format_date(int(vuln["firstSeen"]))
-                vuln["lastSeen"] = format_date(int(vuln["lastSeen"]))
-                vulns.append(vuln)
+                for vuln in result:
+                    vuln["CISA_due_date"] = due_date
+                    vuln["cve"] = ",".join(
+                        intersect(cve_list, vuln["cve"].split(","))
+                    )
+                    vuln["firstSeen"] = format_date(int(vuln["firstSeen"]))
+                    vuln["lastSeen"] = format_date(int(vuln["lastSeen"]))
+                    vulns.append(vuln)
 
-    sem.release()
     return vulns
 
 
