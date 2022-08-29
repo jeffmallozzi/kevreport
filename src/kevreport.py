@@ -3,7 +3,6 @@ import argparse
 import asyncio
 import configparser
 import logging
-from asyncio.log import logger
 from csv import DictWriter
 from datetime import datetime
 from pathlib import Path
@@ -12,7 +11,11 @@ import requests
 from tenable.sc import TenableSC
 
 __version__ = "0.1.0"
-sem = asyncio.Semaphore(3)
+sem = asyncio.Semaphore(4)
+
+# Configure logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 
 def parse_args() -> argparse.Namespace:
@@ -141,10 +144,6 @@ async def main():
     if args.version:
         print(f"Version: {__version__}")
         return
-
-    # Configure logging
-    logger = logging.getLogger(__name__)
-    logging.basicConfig(level=logging.DEBUG)
 
     # Get config
     logger.debug(f"Fetching config from file: {args.config}")
