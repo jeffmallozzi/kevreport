@@ -14,7 +14,7 @@ __version__ = "0.1.0"
 sem = asyncio.Semaphore(2)
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     """Define command line arguments and returns the parsed
     argument parser"""
     parser = argparse.ArgumentParser()
@@ -26,30 +26,30 @@ def parse_args():
     return parser.parse_args()
 
 
-def intersect(list_a, list_b):
+def intersect(list_a: list[str], list_b: list[str]) -> list[str]:
     """Returns a list which is the intersection of two lists,
     duplicates are removed"""
     return sorted(list(set(list_a) & set(list_b)))
 
 
-def chunk(lst, chunk_size):
+def chunk(lst: list, chunk_size: int) -> list:
     """Generator for yeilding chuncks of a list"""
     for i in range(0, len(lst), chunk_size):
         yield lst[i : i + chunk_size]
 
 
-def format_date(timestamp):
+def format_date(timestamp: int) -> str:
     """Returns a formated string from a timestamp int"""
     return datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d")
 
 
-def get_kev(url):
+def get_kev(url: str) -> dict:
     """Retrieves the KEV from CISA and returns it in json format"""
     resp = requests.get(url)
     return resp.json()["vulnerabilities"]
 
 
-def sort_by_due_date(kev):
+def sort_by_due_date(kev: list[dict]) -> dict:
     """Takes the KEV list and creates a dict with each unique
     due date as keys and the list of CVEs as values"""
     resp = {}
@@ -58,7 +58,12 @@ def sort_by_due_date(kev):
     return resp
 
 
-async def get_vulns(cve_list, due_date, config, profile):
+async def get_vulns(
+    cve_list: list[str],
+    due_date: str,
+    config: configparser.ConfigParser,
+    profile: str,
+) -> list[dict]:
     """Queries Tenable.sc for all vulnerabilites associated with the
     provided list of CVE. Date fields are properly formated. Returns a list"""
     vulns = []
@@ -96,7 +101,7 @@ async def get_vulns(cve_list, due_date, config, profile):
     return vulns
 
 
-def sort_vulns_by_repo(vulns):
+def sort_vulns_by_repo(vulns: list[dict]) -> dict:
     """Takes a list of vulnerabilities and creates a dict with repository
     names as the keys and the list of vulnerabilities as the values"""
     resp = {}
@@ -106,7 +111,9 @@ def sort_vulns_by_repo(vulns):
     return resp
 
 
-async def write_file(repo, vuln_list, field_names):
+async def write_file(
+    repo: str, vuln_list: list[str], field_names: list[str]
+) -> str:
     """Writes out the csv file for the list of vulnerabilities. Returns
     the name of the file"""
     filename = (
