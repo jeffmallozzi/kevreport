@@ -3,6 +3,7 @@ import argparse
 import asyncio
 import configparser
 import logging
+from asyncio.log import logger
 from csv import DictWriter
 from datetime import datetime
 from pathlib import Path
@@ -11,7 +12,7 @@ import requests
 from tenable.sc import TenableSC
 
 __version__ = "0.1.0"
-sem = asyncio.Semaphore(2)
+sem = asyncio.Semaphore(3)
 
 
 def parse_args() -> argparse.Namespace:
@@ -66,6 +67,9 @@ async def get_vulns(
 ) -> list[dict]:
     """Queries Tenable.sc for all vulnerabilites associated with the
     provided list of CVE. Date fields are properly formated. Returns a list"""
+    logger.info(f"Starting Due Date: {due_date}")
+    logger.debug(f"CVE List: {cve_list}")
+
     vulns = []
 
     async with sem:
@@ -97,6 +101,9 @@ async def get_vulns(
                     vuln["lastSeen"] = format_date(int(vuln["lastSeen"]))
                     vulns.append(vuln)
 
+    logger.info(
+        f"Finishing Due Date: {due_date} with {len(vulns)} vulnerabilities"
+    )
     return vulns
 
 
@@ -118,6 +125,7 @@ async def write_file(
     filename = (
         f"BOD-22-01-KEV-{repo}-{datetime.now().strftime('%Y-%m-%d')}.csv"
     )
+    field_names = ["CISA_due_date"].extend(field_names)
     with open(filename, "w", newline="") as cf:
         writer = DictWriter(cf, fieldnames=field_names, extrasaction="ignore")
         writer.writeheader()
@@ -136,7 +144,7 @@ async def main():
 
     # Configure logging
     logger = logging.getLogger(__name__)
-    logging.basicConfig()
+    logging.basicConfig(level=logging.DEBUG)
 
     # Get config
     logger.debug(f"Fetching config from file: {args.config}")
