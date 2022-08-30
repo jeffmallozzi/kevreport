@@ -70,12 +70,12 @@ async def get_vulns(
 ) -> list[dict]:
     """Queries Tenable.sc for all vulnerabilites associated with the
     provided list of CVE. Date fields are properly formated. Returns a list"""
-    logger.info(f"Starting Due Date: {due_date}")
-    logger.info(f"CVE List: {cve_list}")
-
-    vulns = []
 
     async with sem:
+        logger.info(f"Starting Due Date: {due_date}")
+        logger.info(f"CVE List: {cve_list}")
+
+        vulns = []
         with TenableSC(
             config[profile]["host"],
             config[profile]["access_key"],
@@ -104,9 +104,9 @@ async def get_vulns(
                     vuln["lastSeen"] = format_date(int(vuln["lastSeen"]))
                     vulns.append(vuln)
 
-    logger.info(
-        f"Finishing Due Date: {due_date} with {len(vulns)} vulnerabilities"
-    )
+        logger.info(
+            f"Finishing Due Date: {due_date} with {len(vulns)} vulnerabilities"
+        )
     return vulns
 
 
@@ -128,7 +128,7 @@ async def write_file(
     filename = (
         f"BOD-22-01-KEV-{repo}-{datetime.now().strftime('%Y-%m-%d')}.csv"
     )
-    field_names = ["CISA_due_date"].extend(field_names)
+    field_names.insert(0, "CISA_due_date")
     with open(filename, "w", newline="") as cf:
         writer = DictWriter(cf, fieldnames=field_names, extrasaction="ignore")
         writer.writeheader()
