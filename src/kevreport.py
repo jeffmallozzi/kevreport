@@ -11,7 +11,7 @@ import requests
 from tenable.sc import TenableSC
 
 __version__ = "0.1.0"
-sem = asyncio.Semaphore(3)
+sem = asyncio.Semaphore(4)
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -72,8 +72,6 @@ async def get_vulns(
     provided list of CVE. Date fields are properly formated. Returns a list"""
 
     async with sem:
-        logger.info(f"Starting Due Date: {due_date}")
-        logger.info(f"CVE List: {cve_list}")
 
         vulns = []
         with TenableSC(
@@ -93,6 +91,7 @@ async def get_vulns(
                 ]
                 kwargs = {"tool": "vulndetails"}
 
+                logger.info(f"Due Date: {due_date} CVE: {cves}")
                 result = sc.analysis.vulns(*filters, **kwargs)
 
                 for vuln in result:
