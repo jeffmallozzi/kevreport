@@ -11,11 +11,11 @@ import requests
 from tenable.sc import TenableSC
 
 __version__ = "0.1.0"
-sem = asyncio.Semaphore(4)
+sem = asyncio.Semaphore(3)
 
 # Configure logging
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 def parse_args() -> argparse.Namespace:
@@ -71,7 +71,7 @@ async def get_vulns(
     """Queries Tenable.sc for all vulnerabilites associated with the
     provided list of CVE. Date fields are properly formated. Returns a list"""
     logger.info(f"Starting Due Date: {due_date}")
-    logger.debug(f"CVE List: {cve_list}")
+    logger.info(f"CVE List: {cve_list}")
 
     vulns = []
 
@@ -146,7 +146,7 @@ async def main():
         return
 
     # Get config
-    logger.debug(f"Fetching config from file: {args.config}")
+    logger.info(f"Fetching config from file: {args.config}")
     if not Path(args.config).exists():
         raise FileNotFoundError(f"Config file: {args.config} does not exist")
 
